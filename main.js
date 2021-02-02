@@ -116,7 +116,7 @@ put B in g
 
 (() => {
   const regl = createREGL()
-  const RADIUS = Math.pow(2, 8)
+  const RADIUS = Math.pow(2, 9)
   // const INITIAL_CONDITIONS = (Array(RADIUS * RADIUS)).fill(0).map(
   //   () => [
   //     Math.random() > 0.9 ? 255 : 0,
@@ -157,15 +157,15 @@ put B in g
         varying vec2 uv;
 
         vec4 get(int dx, int dy) {
-            return texture2D(prevState, uv+vec2(dx, dy)/radius);
+            return texture2D(prevState, uv + vec2(dx, dy)/radius);
         }
 
         void main() {
             float da = 1.0;
-            float db = 0.5;
+            float db = 0.25;
             float dt = 1.0;
-            float feedRate = 0.0367;
-            float killRate = 0.0649;
+            float feedRate = 0.0267;
+            float killRate = 0.0549;
 
             float a = get(0, 0).r;
             float b = get(0, 0).g;
@@ -175,7 +175,7 @@ put B in g
                 get(0, -1).r * 0.2 +
                 get(1, -1).r * 0.05 +
                 get(-1, 0).r * 0.2 +
-                get(0, 0).r * -1.0 +
+                a * -1.0 +
                 get(1, 0).r * 0.2 +
                 get(-1, 1).r * 0.05 +
                 get(0, 1).r * 0.2 +
@@ -186,7 +186,7 @@ put B in g
                 get(0, -1).g * 0.2 +
                 get(1, -1).g * 0.05 +
                 get(-1, 0).g * 0.2 +
-                get(0, 0).g * -1.0 +
+                b * -1.0 +
                 get(1, 0).g * 0.2 +
                 get(-1, 1).g * 0.05 +
                 get(0, 1).g * 0.2 +
@@ -194,8 +194,8 @@ put B in g
             
             float reaction = a*b*b;
 
-            float ap = a + (da * laplaceA - reaction + feedRate * (1.0 - a)) * dt;
-            float bp = b + (db * laplaceB + reaction - (feedRate + killRate) * b) * dt;
+            float ap = clamp(a + (da * laplaceA - reaction + feedRate * (1.0 - a)) * dt, 0.0, 1.0);
+            float bp = clamp(b + (db * laplaceB + reaction - (feedRate + killRate) * b) * dt, 0.0, 1.0);
 
             gl_FragColor = vec4(ap, bp, 0, 1);
         }`,
@@ -212,7 +212,7 @@ put B in g
         void main() {
             float a = texture2D(prevState, uv).r;
             float b = texture2D(prevState, uv).g;
-            gl_FragColor = vec4(a, b, 0, 1);
+            gl_FragColor = vec4(vec3(1)*smoothstep(0.1,0.6,b), 1);
         }`,
 
     // language=GLSL
