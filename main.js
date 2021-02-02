@@ -116,7 +116,7 @@ put B in g
 
 (() => {
   const regl = createREGL()
-  const RADIUS = Math.pow(2, 9)
+  const RADIUS = Math.pow(2, 10)
   // const INITIAL_CONDITIONS = (Array(RADIUS * RADIUS)).fill(0).map(
   //   () => [
   //     Math.random() > 0.9 ? 255 : 0,
@@ -156,46 +156,37 @@ put B in g
         uniform float radius;
         varying vec2 uv;
 
-        vec4 get(int dx, int dy) {
-            return texture2D(prevState, uv + vec2(dx, dy)/radius);
+        vec2 get(int dx, int dy) {
+            return texture2D(prevState, uv + vec2(dx, dy)/radius).rg;
         }
 
         void main() {
             float da = 1.0;
-            float db = 0.25;
+            float db = 0.3;
             float dt = 1.0;
-            float feedRate = 0.0267;
+            float feedRate = 0.017;
             float killRate = 0.0549;
 
-            float a = get(0, 0).r;
-            float b = get(0, 0).g;
+            vec2 ab = get(0, 0).rg;
+            
+            vec2 laplaceAB =
+                get(-1, -1) * 0.05 +
+                get(0, -1) * 0.2 +
+                get(1, -1) * 0.05 +
+                get(-1, 0) * 0.2 +
+                ab * -1.0 +
+                get(1, 0) * 0.2 +
+                get(-1, 1) * 0.05 +
+                get(0, 1) * 0.2 +
+                get(1, 1) * 0.05;
 
-            float laplaceA =
-                get(-1, -1).r * 0.05 +
-                get(0, -1).r * 0.2 +
-                get(1, -1).r * 0.05 +
-                get(-1, 0).r * 0.2 +
-                a * -1.0 +
-                get(1, 0).r * 0.2 +
-                get(-1, 1).r * 0.05 +
-                get(0, 1).r * 0.2 +
-                get(1, 1).r * 0.05;
-
-            float laplaceB =
-                get(-1, -1).g * 0.05 +
-                get(0, -1).g * 0.2 +
-                get(1, -1).g * 0.05 +
-                get(-1, 0).g * 0.2 +
-                b * -1.0 +
-                get(1, 0).g * 0.2 +
-                get(-1, 1).g * 0.05 +
-                get(0, 1).g * 0.2 +
-                get(1, 1).g * 0.05;
+            float a = ab.r;
+            float b = ab.g;
             
             float reaction = a*b*b;
 
-            float ap = clamp(a + (da * laplaceA - reaction + feedRate * (1.0 - a)) * dt, 0.0, 1.0);
-            float bp = clamp(b + (db * laplaceB + reaction - (feedRate + killRate) * b) * dt, 0.0, 1.0);
+            float ap = a + (da * laplaceAB.r - reaction + feedRate * (1.0 - a)) * dt;
+            float bp = b + (db * laplaceAB.g + reaction - (feedRate + killRate) * b) * dt;
 
             gl_FragColor = vec4(ap, bp, 0, 1);
         }`,
