@@ -127,8 +127,13 @@ put B in g
 
   const INITIAL_CONDITIONS = (Array(RADIUS * RADIUS)).fill(0).map(
     (v, i) => [
-      (i%RADIUS > RADIUS/2) ? 255 : 0,
-      (i%RADIUS < RADIUS/2) ? 255 : 0,
+      255,
+      (
+        (i / RADIUS >  2 * RADIUS / 5)
+        && (i / RADIUS < 3 * RADIUS / 5)
+        && i % RADIUS > 2* RADIUS / 5
+        && i % RADIUS < 3 * RADIUS / 5
+      ) ? 255 : 0,
       0,
       255
     ]).flat()
@@ -150,15 +155,47 @@ put B in g
         uniform sampler2D prevState;
         uniform float radius;
         varying vec2 uv;
-        void main() {
-            float a = texture2D(prevState, uv).r;
-            float b = texture2D(prevState, uv).g;
-            float dt = 1.0;
-            float feedRate = 0.055;
-            float killRate = 0.062;
 
-            float ap = a + (feedRate * (1.0 - a)) * dt;
-            float bp = b - ((feedRate + killRate) * b) * dt;
+        vec4 get(int dx, int dy) {
+            return texture2D(prevState, uv+vec2(dx, dy)/radius);
+        }
+
+        void main() {
+            float da = 1.0;
+            float db = 0.5;
+            float dt = 1.0;
+            float feedRate = 0.0367;
+            float killRate = 0.0649;
+
+            float a = get(0, 0).r;
+            float b = get(0, 0).g;
+
+            float laplaceA =
+                get(-1, -1).r * 0.05 +
+                get(0, -1).r * 0.2 +
+                get(1, -1).r * 0.05 +
+                get(-1, 0).r * 0.2 +
+                get(0, 0).r * -1.0 +
+                get(1, 0).r * 0.2 +
+                get(-1, 1).r * 0.05 +
+                get(0, 1).r * 0.2 +
+                get(1, 1).r * 0.05;
+
+            float laplaceB =
+                get(-1, -1).g * 0.05 +
+                get(0, -1).g * 0.2 +
+                get(1, -1).g * 0.05 +
+                get(-1, 0).g * 0.2 +
+                get(0, 0).g * -1.0 +
+                get(1, 0).g * 0.2 +
+                get(-1, 1).g * 0.05 +
+                get(0, 1).g * 0.2 +
+                get(1, 1).g * 0.05;
+            
+            float reaction = a*b*b;
+
+            float ap = a + (da * laplaceA - reaction + feedRate * (1.0 - a)) * dt;
+            float bp = b + (db * laplaceB + reaction - (feedRate + killRate) * b) * dt;
 
             gl_FragColor = vec4(ap, bp, 0, 1);
         }`,
@@ -175,7 +212,7 @@ put B in g
         void main() {
             float a = texture2D(prevState, uv).r;
             float b = texture2D(prevState, uv).g;
-            gl_FragColor = vec4(a,b,0, 1);
+            gl_FragColor = vec4(a, b, 0, 1);
         }`,
 
     // language=GLSL
