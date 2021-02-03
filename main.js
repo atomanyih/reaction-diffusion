@@ -33,12 +33,12 @@ const updateLife = regl({
   // language=GLSL
   frag: `
       precision mediump float;
-      uniform sampler2D prevState;
+      uniform sampler2D srcTexture;
       uniform float radius;
       varying vec2 uv;
 
       vec2 get(int dx, int dy) {
-          return texture2D(prevState, uv + vec2(dx, dy)/radius).rg;
+          return texture2D(srcTexture, uv + vec2(dx, dy)/radius).rg;
       }
 
       void main() {
@@ -71,20 +71,24 @@ const updateLife = regl({
 
           gl_FragColor = vec4(ap, bp, 0, 1);
       }`,
+  uniforms: {
+    srcTexture: regl.prop('srcTexture'),
+  },
 
-  framebuffer: ({tick}) => state[(tick + 1) % 2]
+  framebuffer: regl.prop('dstTexture')
 })
 
 const setupQuad = regl({
   // language=GLSL
   frag: `
       precision mediump float;
-      uniform sampler2D prevState;
+      uniform sampler2D srcTexture;
       varying vec2 uv;
       void main() {
-          float a = texture2D(prevState, uv).r;
-          float b = texture2D(prevState, uv).g;
-          gl_FragColor = vec4(vec3(1)*smoothstep(0.1, 0.6, b), 1);
+          float a = texture2D(srcTexture, uv).r;
+          float b = texture2D(srcTexture, uv).g;
+          gl_FragColor = vec4(vec3(smoothstep(0.1, 0.6, b)), 1);
+//          gl_FragColor = vec4(vec3(step(0.3, b)), 1);
       }`,
 
   // language=GLSL
@@ -102,7 +106,7 @@ const setupQuad = regl({
   },
 
   uniforms: {
-    prevState: ({tick}) => state[tick % 2],
+    srcTexture: regl.prop('srcTexture'),
     radius: RADIUS
   },
 
@@ -113,8 +117,9 @@ const setupQuad = regl({
 })
 
 regl.frame(() => {
-  setupQuad(() => {
+  setupQuad({srcTexture: state[0]}, () => {
     regl.draw()
-    updateLife()
+    updateLife({srcTexture: state[0], dstTexture: state[1]})
+    updateLife({srcTexture: state[1], dstTexture: state[0]});
   })
 })
