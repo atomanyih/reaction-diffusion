@@ -1,122 +1,7 @@
-// (() => {
-//   const regl = createREGL()
-//
-//   const drawTriangle = regl({
-//     // fragment shader
-//     // language=GLSL
-//     frag: `
-//         precision mediump float;
-//         uniform vec4 color;
-//         void main () {
-//             gl_FragColor = color;
-//         }`,
-//
-//     // vertex shader
-//     // language=GLSL
-//     vert: `
-//         precision mediump float;
-//         attribute vec2 position;
-//         void main () {
-//             gl_Position = vec4(position, 0, 1);
-//         }`,
-//
-//     // attributes
-//     attributes: {
-//       position: function(context, props) {
-//         return [
-//           [-1 * Math.cos(context.tick / 100), 0],
-//           [Math.sin(context.tick / 100), -1],
-//           [Math.sin(context.tick / 100), 1]
-//         ];
-//       }
-//     },
-//
-//     // uniforms
-//     uniforms: {
-//       // color: function(context, props) {
-//       //   return props.color;
-//       // }
-//       color: regl.prop('color'),
-//     },
-//
-//     // vertex count
-//     count: 3
-//   });
-//
-//   // regl.frame(function(context) {
-//   //   drawTriangle({color: [Math.sin(context.tick / 100),1,0,1]});
-//   // });
-// })()
-
-// const regl = createREGL()
-//
-// const drawDots = regl({
-//   // language=GLSL
-//   frag: `
-//   precision mediump float;
-//   uniform vec4 color;
-//   void main () {
-//     gl_FragColor = color;
-//   }`,
-//
-//   // language=GLSL
-//   vert: `
-//   precision mediump float;
-//   attribute vec2 position;
-//   // @change acquire the pointWidth uniform
-//   //  this is set by the uniforms section below
-//   uniform float pointWidth;
-//
-//   void main () {
-//     // @change Set gl_PointSize global to
-//     //  configure point size
-//     gl_PointSize = pointWidth;
-//     gl_Position = vec4(position, 0, 1);
-//   }`,
-//
-//   attributes: {
-//     position: function(context, props) {
-//       // @change I tweaked the constants here so
-//       //  the dots are not off the screen
-//       return [
-//         [-1 * Math.cos(context.tick / 100), 0.2],
-//         [Math.sin(context.tick / 100), -0.8],
-//         [Math.sin(context.tick / 100), 0.8]
-//       ];
-//     }
-//   },
-//
-//   uniforms: {
-//     color: function(context, props) {
-//       return props.color;
-//     },
-//     // @change: Add a pointWidth uniform -
-//     //  set by a prop
-//     pointWidth: regl.prop("pointWidth")
-//   },
-//
-//   count: 3,
-//   // @change: Set our primitive to points
-//   primitive: "points"
-// });
-//
-// regl.frame(function(context) {
-//   drawDots({
-//     color: [0.208, 0.304, 1.0, 1.0],
-//     // @change: Pass in the pointWidth prop
-//     pointWidth: 10.0
-//   });
-// });
-
-
-/*
-put A in r
-put B in g
- */
 
 (() => {
-  const regl = createREGL()
-  const RADIUS = Math.pow(2, 10)
+  const regl = createREGL(document.getElementById('canvas'))
+  const RADIUS = Math.pow(2, 9)
   // const INITIAL_CONDITIONS = (Array(RADIUS * RADIUS)).fill(0).map(
   //   () => [
   //     Math.random() > 0.9 ? 255 : 0,
@@ -164,7 +49,7 @@ put B in g
             float da = 1.0;
             float db = 0.3;
             float dt = 1.0;
-            float feedRate = 0.017;
+            float feedRate = 0.027;
             float killRate = 0.0549;
 
             vec2 ab = get(0, 0).rg;
