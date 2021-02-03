@@ -10,7 +10,7 @@ const drawInitial = () => {
   ctx.fillStyle = 'rgb(255,255,0)';
   const size = 100;
   ctx.beginPath();
-  ctx.ellipse(width/2, height / 2, size, size, Math.PI * .25, 0, Math.PI * 2);
+  ctx.ellipse(width / 2, height / 2, size, size, Math.PI * .25, 0, Math.PI * 2);
   ctx.fill();
 
   return ctx
@@ -19,15 +19,17 @@ const drawInitial = () => {
 const regl = createREGL(document.getElementById('canvas'))
 const RADIUS = Math.pow(2, 9)
 
-const state = (Array(2)).fill().map(() =>
-  regl.framebuffer({
-    color: regl.texture({
-      radius: RADIUS, // width AND height
-      data: drawInitial(),
-      wrap: 'repeat'
-    }),
-    depthStencil: false
-  }))
+const state = (Array(2)).fill().map(
+  () =>
+    regl.framebuffer({
+      color: regl.texture({
+        radius: RADIUS, // width AND height
+        data: drawInitial(),
+        wrap: 'repeat'
+      }),
+      depthStencil: false
+    })
+);
 
 const updateLife = regl({
   // language=GLSL
@@ -43,9 +45,9 @@ const updateLife = regl({
 
       void main() {
           float da = 1.0;
-          float db = 0.3;
+          float db = 0.27 * (uv.x + uv.y);
           float dt = 1.0;
-          float feedRate = 0.027;
+          float feedRate = 0.037;
           float killRate = 0.0549;
 
           vec2 ab = get(0, 0).rg;
@@ -87,8 +89,8 @@ const setupQuad = regl({
       void main() {
           float a = texture2D(srcTexture, uv).r;
           float b = texture2D(srcTexture, uv).g;
-          gl_FragColor = vec4(vec3(smoothstep(0.1, 0.6, b)), 1);
-//          gl_FragColor = vec4(vec3(step(0.3, b)), 1);
+          gl_FragColor = vec4(vec3(smoothstep(0.25, 0.3, b)), 1);
+          //          gl_FragColor = vec4(vec3(step(0.25, b)), 1);
       }`,
 
   // language=GLSL
