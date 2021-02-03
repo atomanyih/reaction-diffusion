@@ -31,11 +31,21 @@ const state = (Array(2)).fill().map(
     })
 );
 
+const parameters = regl.framebuffer({
+  color: regl.texture({
+    radius: RADIUS, // width AND height
+    data: Array(RADIUS * RADIUS * 4).fill(255 * 0.27)
+  }),
+  depthStencil: false
+})
+
+
 const updateLife = regl({
   // language=GLSL
   frag: `
       precision mediump float;
       uniform sampler2D srcTexture;
+      uniform sampler2D parameters;
       uniform float radius;
       varying vec2 uv;
 
@@ -45,7 +55,8 @@ const updateLife = regl({
 
       void main() {
           float da = 1.0;
-          float db = 0.27 * (uv.x + uv.y);
+          float db = texture2D(parameters, uv).r;
+
           float dt = 1.0;
           float feedRate = 0.037;
           float killRate = 0.0549;
@@ -75,6 +86,7 @@ const updateLife = regl({
       }`,
   uniforms: {
     srcTexture: regl.prop('srcTexture'),
+    parameters: parameters
   },
 
   framebuffer: regl.prop('dstTexture')
@@ -117,6 +129,43 @@ const setupQuad = regl({
   // 3 vertices
   count: 3
 })
+
+const drawParameters = regl({
+  //language=GLSL
+  frag: `
+      precision mediump float;
+      varying vec2 uv;
+
+      void main() {
+          float diffusionB = 0.27 * (uv.x + uv.y);
+          gl_FragColor = vec4(vec3(diffusionB), 1);
+      }
+  `,
+  //language=GLSL
+  vert: `
+      precision mediump float;
+      attribute vec2 position;
+      varying vec2 uv;
+      void main() {
+          uv = 0.5 * (position + 1.0); //goes from 0 -> 1
+          gl_Position = vec4(position, 0, 1);
+      }`,
+
+  uniforms: {
+    radius: RADIUS
+  },
+
+  attributes: {
+    position: [[-4, -4], [4, -4], [0, 4]]
+  },
+
+  depth: {enable: false},
+
+  count: 3,
+  framebuffer: regl.prop('dstTexture')
+})
+
+drawParameters({dstTexture: parameters});
 
 regl.frame(() => {
   setupQuad({srcTexture: state[0]}, () => {
