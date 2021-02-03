@@ -54,12 +54,13 @@ const updateLife = regl({
       }
 
       void main() {
-          float da = 1.0;
+          float da = texture2D(parameters, uv).r;
           float db = texture2D(parameters, uv).g;
 
+          float feedRate = texture2D(parameters, uv).b;
+          float killRate = texture2D(parameters, uv).a;
+
           float dt = 1.0;
-          float feedRate = 0.037;
-          float killRate = 0.0549;
 
           vec2 ab = get(0, 0).rg;
 
@@ -137,8 +138,17 @@ const drawParameters = regl({
       varying vec2 uv;
 
       void main() {
+          float diffusionA = 1.0;
           float diffusionB = 0.27 * (uv.x + uv.y);
-          gl_FragColor = vec4(1, diffusionB, 1, 1);
+          float feedRate = 0.037;
+          float killRate = 0.0549;
+
+          gl_FragColor = vec4(
+            diffusionA,
+            diffusionB,
+            feedRate,
+            killRate
+          );
       }
   `,
   //language=GLSL
@@ -147,7 +157,7 @@ const drawParameters = regl({
       attribute vec2 position;
       varying vec2 uv;
       void main() {
-          uv = 0.5 * (position + 1.0); //goes from 0 -> 1
+          uv = 0.5 * (position + 1.0);//goes from 0 -> 1
           gl_Position = vec4(position, 0, 1);
       }`,
 
