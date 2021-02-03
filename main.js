@@ -55,7 +55,7 @@ const updateLife = regl({
 
       void main() {
           float da = 1.0;
-          float db = texture2D(parameters, uv).r;
+          float db = texture2D(parameters, uv).g;
 
           float dt = 1.0;
           float feedRate = 0.037;
@@ -138,7 +138,7 @@ const drawParameters = regl({
 
       void main() {
           float diffusionB = 0.27 * (uv.x + uv.y);
-          gl_FragColor = vec4(vec3(diffusionB), 1);
+          gl_FragColor = vec4(1, diffusionB, 1, 1);
       }
   `,
   //language=GLSL
