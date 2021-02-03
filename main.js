@@ -1,31 +1,27 @@
+const drawInitial = () => {
+  const canvas = document.getElementById('initialImage');
+  const width = canvas.width;
+  const height = canvas.height;
+
+  const ctx = canvas.getContext('2d')
+  ctx.fillStyle = 'red';
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.fillStyle = 'green';
+  const size = 100;
+  ctx.fillRect(width / 2 - size/2, height / 2 - size/2, size, size);
+
+  return ctx
+}
+
 const regl = createREGL(document.getElementById('canvas'))
 const RADIUS = Math.pow(2, 9)
-// const INITIAL_CONDITIONS = (Array(RADIUS * RADIUS)).fill(0).map(
-//   () => [
-//     Math.random() > 0.9 ? 255 : 0,
-//     Math.random() > 0.9 ? 255 : 0,
-//     Math.random() > 0.9 ? 255 : 0,
-//     1
-//   ]).flat()
-
-const INITIAL_CONDITIONS = (Array(RADIUS * RADIUS)).fill(0).map(
-  (v, i) => [
-    255,
-    (
-      (i / RADIUS > 2 * RADIUS / 5)
-      && (i / RADIUS < 3 * RADIUS / 5)
-      && i % RADIUS > 2 * RADIUS / 5
-      && i % RADIUS < 3 * RADIUS / 5
-    ) ? 255 : 0,
-    0,
-    255
-  ]).flat()
 
 const state = (Array(2)).fill().map(() =>
   regl.framebuffer({
     color: regl.texture({
       radius: RADIUS, // width AND height
-      data: INITIAL_CONDITIONS,
+      data: drawInitial(),
       wrap: 'repeat'
     }),
     depthStencil: false
