@@ -4,12 +4,14 @@ const drawInitial = () => {
   const height = canvas.height;
 
   const ctx = canvas.getContext('2d')
-  ctx.fillStyle = 'red';
+  ctx.fillStyle = 'rgb(255,0,0)';
   ctx.fillRect(0, 0, width, height);
 
-  ctx.fillStyle = 'green';
+  ctx.fillStyle = 'rgb(255,255,0)';
   const size = 100;
-  ctx.fillRect(width / 2 - size/2, height / 2 - size/2, size, size);
+  ctx.beginPath();
+  ctx.ellipse(width/2, height / 2, size, size, Math.PI * .25, 0, Math.PI * 2);
+  ctx.fill();
 
   return ctx
 }
